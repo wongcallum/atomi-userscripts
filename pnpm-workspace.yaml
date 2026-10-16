@@ -1,0 +1,8 @@
+packages:
+  - packages/*
+
+# Shared dependency versions — reference with "catalog:" in each package.json
+catalog:
+  typescript: ^7.0.2
+  vite: ^8.3.4
+  vite-plugin-monkey: ^8.1.1
