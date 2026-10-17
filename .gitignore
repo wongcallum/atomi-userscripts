@@ -2,6 +2,7 @@ node_modules
 dist
 *.local
 *.log
+.mock-llm
 
 .vscode/*
 !.vscode/extensions.json

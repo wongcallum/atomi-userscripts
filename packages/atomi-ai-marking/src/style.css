@@ -1,0 +1,315 @@
+/* Each UI tree is in its own shadow root, so these class names can't clash with Atomi's */
+
+:host {
+  /* Atomi's blue */
+  --accent: #0057ff;
+  --good: #1a7f37;
+  --warn: #b26a00;
+  --bad: #c62828;
+  --line: rgba(128, 128, 128, 0.3);
+  --tint: rgba(128, 128, 128, 0.06);
+}
+
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+button {
+  cursor: pointer;
+}
+/* Atomi's focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Mark button */
+.mark {
+  flex: none;
+  margin-right: 12px;
+  padding: 4px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: none;
+  border: 1.5px solid;
+  border-radius: 999px;
+}
+
+/* Panel */
+.panel {
+  margin-bottom: 24px;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.panel-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--tint);
+  border-bottom: 1px solid var(--line);
+}
+.panel-head .model {
+  margin-left: auto;
+  overflow: hidden;
+  font-weight: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
+}
+.panel-head button {
+  flex: none;
+  padding: 2px 10px;
+  font-size: 13px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.panel-body {
+  padding: 16px;
+}
+.panel-body > :first-child {
+  margin-top: 0;
+}
+.panel-body > :last-child {
+  margin-bottom: 0;
+}
+.note {
+  margin: 8px 0 0;
+}
+.error {
+  color: var(--bad);
+}
+.muted {
+  opacity: 0.6;
+}
+
+.criterion {
+  display: flex;
+  gap: 8px;
+  /* Lines the icon up with the first line, even when maths makes it taller */
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.status {
+  flex: none;
+  color: white;
+}
+/* Centred on the capitals, about 0.35em above the baseline */
+.status svg {
+  vertical-align: calc(0.35em - 10px);
+  background: var(--line);
+  border-radius: 50%;
+}
+.status.met svg {
+  background: var(--good);
+}
+.status.partial svg {
+  background: var(--warn);
+}
+.status.not_met svg {
+  background: var(--bad);
+}
+.status.pending {
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.improvement {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(0, 87, 255, 0.06);
+  border-radius: 8px;
+}
+.improvement b {
+  color: var(--accent);
+}
+
+.score {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--tint);
+  border-top: 1px solid var(--line);
+}
+.score h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.score p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.7;
+}
+.ring {
+  position: relative;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  font-weight: 800;
+}
+.ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--tone) calc(var(--p) * 1%), var(--line) 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+}
+
+.shimmer {
+  display: inline-block;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    rgba(128, 128, 128, 0.9) 30%,
+    rgba(128, 128, 128, 0.3) 50%,
+    rgba(128, 128, 128, 0.9) 70%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  animation: shimmer 1.6s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Settings dialog */
+dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px 24px;
+  font-size: 15px;
+  color: #1a1a1a;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+}
+dialog h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+dialog .message {
+  margin: 0 0 12px;
+  color: var(--accent);
+}
+dialog label {
+  display: block;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+dialog input {
+  display: block;
+  width: 100%;
+  margin: 4px 0 2px;
+  padding: 4px 8px;
+  font-weight: normal;
+  background: white;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 4px;
+}
+dialog small {
+  display: block;
+  font-size: 13px;
+  font-weight: normal;
+  opacity: 0.65;
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.actions button {
+  padding: 4px 16px;
+  font-weight: 600;
+  background: none;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 4px;
+}
+.actions button[type="submit"] {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* HTML rendered from the model's Markdown */
+.html a {
+  color: var(--accent);
+}
+.html code {
+  padding: 0.1em 0.3em;
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 4px;
+}
+.html pre {
+  padding: 8px 12px;
+  overflow-x: auto;
+  background: rgba(128, 128, 128, 0.12);
+  border-radius: 4px;
+}
+.html pre code {
+  padding: 0;
+  background: none;
+}
+.html math {
+  font-size: 1.1em;
+}
+.html math[display="block"] {
+  margin: 0.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.markdown :is(p, ul, ol, pre, blockquote, table) {
+  margin: 0 0 0.75em;
+}
+.markdown > :last-child {
+  margin-bottom: 0;
+}
+.markdown :is(ul, ol) {
+  padding-left: 1.5em;
+}
+.markdown :is(h1, h2, h3, h4) {
+  margin: 1em 0 0.5em;
+  font-size: 1em;
+}
+.markdown blockquote {
+  margin-left: 0;
+  padding-left: 12px;
+  border-left: 3px solid var(--line);
+}
+.markdown table {
+  border-collapse: collapse;
+}
+.markdown :is(th, td) {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+}
+.markdown hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}

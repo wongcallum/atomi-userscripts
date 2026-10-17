@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags: ["*@*"]
+
+permissions:
+  contents: write
+
+concurrency: releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check the tag matches the package version
+        run: |
+          name="${GITHUB_REF_NAME%@*}"
+          version="$(node -p "require('./packages/$name/package.json').version")"
+          test "$GITHUB_REF_NAME" = "$name@$version"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+      - run: pnpm check
+      - run: pnpm typecheck
+      - run: pnpm --filter="./packages/$NAME" build
+      - name: Create the GitHub release
+        run: |
+          prev="$(git tag --list "$NAME@*" --sort=-v:refname | sed -n 2p)"
+          gh release create "$GITHUB_REF_NAME" packages/"$NAME"/dist/*.user.js --generate-notes ${prev:+--notes-start-tag "$prev"}
+        env:
+          GH_TOKEN: ${{ github.token }}
+      # Installed scripts update from this branch (see @updateURL), so each release only replaces its own script
+      - name: Publish to the releases branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git rev-parse --verify -q origin/releases; then
+            git worktree add -B releases out origin/releases
+          else
+            git worktree add --orphan -b releases out
+          fi
+          cp packages/"$NAME"/dist/*.user.js out/
+          git -C out add -A
+          git -C out commit -m "$GITHUB_REF_NAME"
+          git -C out push origin releases

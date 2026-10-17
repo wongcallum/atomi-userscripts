@@ -1,8 +1,18 @@
 packages:
   - packages/*
+  - tools/*
 
 # Shared dependency versions — reference with "catalog:" in each package.json
 catalog:
+  "@copilotkit/aimock": ^1.45.1
+  "@preact/signals": ^2.11.3
+  "@types/node": ^24.0.0
+  eventsource-parser: ^4.1.2
+  marked: ^18.1.1
+  marked-katex-extension: ^5.1.13
+  partial-json: ^0.1.7
+  preact: ^11.0.1
+  temml: ^0.14.0
   typescript: ^7.0.2
   vite: ^8.3.4
   vite-plugin-monkey: ^8.1.1

@@ -1,0 +1,14 @@
+{
+  "name": "mock-llm",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@copilotkit/aimock": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

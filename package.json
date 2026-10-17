@@ -3,7 +3,19 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "pnpm --filter=atomi-ai-marking dev",
     "build": "pnpm -r --filter=./packages/* build",
-    "typecheck": "pnpm -r --filter=./packages/* typecheck"
-  }
+    "serve": "pnpm --filter=atomi-ai-marking serve",
+    "typecheck": "pnpm -r --filter=./packages/* --filter=./tools/* typecheck",
+    "mock-llm": "node tools/mock-llm/main.ts serve",
+    "mock-llm:scenario": "node tools/mock-llm/main.ts scenario",
+    "mock-llm:last": "node tools/mock-llm/main.ts last",
+    "browser": "firefox --no-remote --profile \"$HOME/.firefox-devtools-mcp/profiles/atomi-userscripts/firefox_devtools_mcp_profile\"",
+    "check": "biome check .",
+    "fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15"
+  },
+  "packageManager": "pnpm@11.24.0"
 }

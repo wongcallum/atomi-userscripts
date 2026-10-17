@@ -1,0 +1,27 @@
+{
+  "name": "atomi-ai-marking",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "serve": "vite preview --host 127.0.0.1 --port 4011 --strictPort",
+    "build": "tsc && vite build",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@preact/signals": "catalog:",
+    "eventsource-parser": "catalog:",
+    "temml": "catalog:",
+    "marked": "catalog:",
+    "marked-katex-extension": "catalog:",
+    "partial-json": "catalog:",
+    "preact": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-monkey": "catalog:"
+  }
+}

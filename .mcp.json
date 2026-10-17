@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "firefox-devtools": {
+      "type": "stdio",
+      "command": "pnpx",
+      "args": [
+        "@mozilla/firefox-devtools-mcp@latest",
+        "--profilePath",
+        "${HOME}/.firefox-devtools-mcp/profiles/atomi-userscripts",
+        "--tools",
+        "pages",
+        "snapshot",
+        "input",
+        "network",
+        "console",
+        "screenshot",
+        "downloads",
+        "utilities",
+        "management",
+        "webextension",
+        "screencast",
+        "script"
+      ]
+    }
+  }
+}
