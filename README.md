@@ -5,7 +5,7 @@ Userscripts for [Atomi](https://getatomi.com).
 ## atomi-ai-marking
 
 A userscript that helps you mark your responses to short answer questions against the question's marking guidelines,
-using any OpenAI-compatible LLM API.
+using any OpenAI-compatible LLM API. It sends any images embedded and PDFs linked in the question.
 
 It works with both the plain text answer box and the multi-format editor, including images drawn with the Draw tool.
 
