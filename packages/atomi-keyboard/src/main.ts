@@ -45,6 +45,13 @@ const isTyping = (el: EventTarget | null) =>
   el instanceof Element &&
   !!el.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"], [role="textbox"]');
 
+// Inside shadow roots (e.g. other userscripts' UI), activeElement and event targets are the shadow host
+function deepActiveElement() {
+  let el = document.activeElement;
+  while (el?.shadowRoot?.activeElement) el = el.shadowRoot.activeElement;
+  return el;
+}
+
 function focusAnswer() {
   const box = document.querySelector<HTMLElement>(
     'main [role="textbox"], main textarea, main [contenteditable="true"]',
@@ -56,7 +63,7 @@ function focusAnswer() {
 
 function blurAnswer() {
   if (help.matches(":popover-open")) return toggleHelp();
-  const el = document.activeElement;
+  const el = deepActiveElement();
   if (!isTyping(el)) return false;
   // Let Escape close the editor's auto-suggest menu first
   if ([...document.querySelectorAll<HTMLElement>('[role="menu"]')].some(usable)) return false;
@@ -110,7 +117,7 @@ tinykeys(
     SHORTCUTS.map(([keys, , , action, whileTyping]) => [
       keys,
       (event: KeyboardEvent) => {
-        if (!whileTyping && isTyping(event.target)) return;
+        if (!whileTyping && isTyping(event.composedPath()[0])) return;
         if (action instanceof RegExp ? clickButton(action) : action(event)) {
           event.preventDefault();
           event.stopPropagation();
