@@ -1,7 +1,7 @@
 import { GM_getValue, GM_setValue } from "$";
 
 export const DEFAULT_ENDPOINT = "https://openrouter.ai/api/v1";
-export const DEFAULT_MODEL = "google/gemini-3.8-flash";
+export const DEFAULT_MODEL = "anthropic/claude-haiku-5.5";
 export const DEFAULT_EFFORT = "low";
 
 export interface Settings {

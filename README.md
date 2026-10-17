@@ -18,7 +18,7 @@ It works with both the plain text answer box and the multi-format editor, includ
 1. Answer a short answer question, then click **Self-mark answer**.
 2. Click the **Mark with AI** button in the footer.
 3. For the first run, you'll be prompted to enter an API key.
-   By default the script uses [OpenRouter](https://openrouter.ai/keys) with `google/gemini-3.8-flash`.
+   By default the script uses [OpenRouter](https://openrouter.ai/keys) with `anthropic/claude-haiku-5.5`.
    You can choose any OpenAI-compatible endpoint and model.
 
 ## Development
