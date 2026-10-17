@@ -92,6 +92,15 @@ const SCENARIOS: Record<string, [description: string, fixtures: (mark: number) =
       { match: {}, response: { content: markingJson(mark) }, ...STREAM },
     ],
   ],
+  "bad-request": [
+    "HTTP 400 for every request, so it retries without response_format, then without PDFs",
+    () => [
+      {
+        match: {},
+        response: { error: { message: "Invalid request", type: "invalid_request_error" }, status: 400 },
+      },
+    ],
+  ],
   "cut-off": [
     "Drops the connection partway through the JSON",
     (mark) => [{ match: {}, response: { content: markingJson(mark) }, ...STREAM, truncateAfterChunks: 20 }],
@@ -197,11 +206,15 @@ async function scenario(spec?: string) {
   console.log(`scenario: ${spec}`);
 }
 
-type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
+type Part =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { filename: string; file_data: string } };
 type Message = { role: string; content: string | Part[] | null };
 type ChatRequest = { model?: string; messages?: Message[]; response_format?: unknown; reasoning_effort?: string };
 
-// Writes <name>.txt (readable prompt), <name>.json (request body) and <name>-image-K.<ext> (attached images)
+// Writes <name>.txt (readable prompt), <name>.json (request body), and <name>-image-K.<ext> and <name>-pdf-K.pdf
+// (attachments)
 async function last(name = "last") {
   const latest = readdirSync(REQUESTS_DIR)
     .filter((f) => /^\d+\.json$/.test(f))
@@ -211,12 +224,14 @@ async function last(name = "last") {
   const saved = JSON.parse(readFileSync(join(REQUESTS_DIR, latest), "utf8")) as { auth: boolean; body: string };
   const body = JSON.parse(saved.body) as ChatRequest;
 
-  for (const file of readdirSync(OUT_DIR)) if (file.startsWith(`${name}-image-`)) rmSync(join(OUT_DIR, file));
+  for (const file of readdirSync(OUT_DIR))
+    if (file.startsWith(`${name}-image-`) || file.startsWith(`${name}-pdf-`)) rmSync(join(OUT_DIR, file));
   const lines = [
     `request: requests/${latest}  model: ${body.model}  response_format: ${body.response_format ? "yes" : "no"}  ` +
       `reasoning_effort: ${body.reasoning_effort ?? "-"}  auth: ${saved.auth ? "yes" : "no"}`,
   ];
   let images = 0;
+  let pdfs = 0;
   for (const message of body.messages ?? []) {
     lines.push("", `=== ${message.role}`);
     for (const part of typeof message.content === "string"
@@ -232,12 +247,29 @@ async function last(name = "last") {
           part.image_url.url = file; // keeps the saved JSON readable
         }
         lines.push(`<image: ${part.image_url.url}>`);
+      } else if (part.type === "file") {
+        const m = /^data:application\/pdf;base64,(.*)$/s.exec(part.file.file_data);
+        if (m) {
+          const file = `${name}-pdf-${++pdfs}.pdf`;
+          writeFileSync(join(OUT_DIR, file), Buffer.from(m[1], "base64"));
+          part.file.file_data = file;
+        }
+        lines.push(`<file: ${part.file.filename} (${part.file.file_data})>`);
       }
     }
   }
   writeFileSync(join(OUT_DIR, `${name}.json`), JSON.stringify(body, null, 2));
   writeFileSync(join(OUT_DIR, `${name}.txt`), `${lines.join("\n")}\n`);
-  console.log(`Saved .mock-llm/${name}.txt${images ? ` and ${images} image${images === 1 ? "" : "s"}` : ""}`);
+  const attached = [
+    images && `${images} image${images === 1 ? "" : "s"}`,
+    pdfs && `${pdfs} PDF${pdfs === 1 ? "" : "s"}`,
+  ];
+  console.log(
+    `Saved .mock-llm/${name}.txt${attached
+      .filter(Boolean)
+      .map((a) => ` and ${a}`)
+      .join("")}`,
+  );
 }
 
 const [command, arg] = process.argv.slice(2);

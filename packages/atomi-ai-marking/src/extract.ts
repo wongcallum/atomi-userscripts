@@ -14,6 +14,8 @@ export interface MarkingContext {
   max: number | null;
   /** URLs of the images referred to as [Image N] */
   images: string[];
+  /** URLs of the PDFs referred to as [PDF N] */
+  pdfs: string[];
 }
 
 const SKIP_TAGS = new Set([
@@ -67,13 +69,15 @@ function imageRef(images: string[], src: string, alt?: string | null): string {
   return `[Image ${images.length}${alt ? `: ${alt}` : ""}]`;
 }
 
+const isPdf = (a: HTMLAnchorElement) => /\.pdf$/i.test(a.pathname);
+
 function katexToText(el: Element): string {
   const tex = el.querySelector('annotation[encoding="application/x-tex"]')?.textContent;
   if (tex == null) return el.textContent;
   return el.closest(".katex-display") ? `\n$$${tex}$$\n` : `$${tex}$`;
 }
 
-function domToText(root: Element | DocumentFragment, images: string[]): string {
+function domToText(root: Element | DocumentFragment, images: string[], pdfs?: string[]): string {
   // Atomi hides its KaTeX from screen readers (aria-hidden) and describes it in words ("start subscript, 84, end
   // subscript...") in a visually hidden element named by aria-describedby.
   const spoken = new Set<string>();
@@ -108,6 +112,11 @@ function domToText(root: Element | DocumentFragment, images: string[]): string {
       if (img.src) out += imageRef(images, img.src, img.alt);
       return;
     }
+    if (tag === "A" && pdfs && isPdf(el as HTMLAnchorElement)) {
+      pdfs.push((el as HTMLAnchorElement).href);
+      out += `[PDF ${pdfs.length}: ${el.textContent.trim()}]`;
+      return;
+    }
     if (tag === "BR") {
       out += "\n";
       return;
@@ -133,13 +142,13 @@ function domToText(root: Element | DocumentFragment, images: string[]): string {
 }
 
 // Everything in the question card above the "Your answer" box
-function readQuestion(answerBox: AnswerBox, images: string[]): string {
+function readQuestion(answerBox: AnswerBox, images: string[], pdfs: string[]): string {
   const container = answerBox.closest("article") ?? document.querySelector("main")!;
   const label = answerBox.id ? document.querySelector(`label[for="${CSS.escape(answerBox.id)}"]`) : null;
   const range = document.createRange();
   range.setStart(container, 0);
   range.setEndBefore(label && container.contains(label) ? label : answerBox);
-  return domToText(range.cloneContents(), images);
+  return domToText(range.cloneContents(), images, pdfs);
 }
 
 // The guidelines link contains the markdown in base64
@@ -240,7 +249,8 @@ export function collectContext(link: HTMLAnchorElement): MarkingContext {
   const images: string[] = [];
   // Answer first, so the image limit never drops the drawing
   const answer = readAnswer(answerBox, images);
-  const question = readQuestion(answerBox, images);
+  const pdfs: string[] = [];
+  const question = readQuestion(answerBox, images, pdfs);
   const guidelines = readGuidelines(link, images);
   const options = markOptions();
   const max = options.length
@@ -254,5 +264,6 @@ export function collectContext(link: HTMLAnchorElement): MarkingContext {
     latex: isMathField(answerBox),
     max,
     images,
+    pdfs,
   };
 }

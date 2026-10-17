@@ -1,5 +1,5 @@
 import type { MarkingContext } from "./extract";
-import type { LoadedImage } from "./images";
+import type { LoadedImage, LoadedPdf } from "./images";
 import SYSTEM_PROMPT from "./system-prompt.md?raw";
 
 const RESPONSE_FORMAT = {
@@ -38,7 +38,10 @@ const FOLLOW_UP = `<instructions>
 The student is now asking follow-up questions about your marking. Reply conversationally in Markdown (with $...$ maths), not JSON. Be helpful, but guide them rather than spoon-feed. You can't change the recorded mark, but if you now think it was wrong, you can say so.
 </instructions>`;
 
-type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
+type Part =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } }
+  | { type: "file"; file: { filename: string; file_data: string } };
 
 export type Message = { role: "system" | "user"; content: string | Part[] } | { role: "assistant"; content: string };
 
@@ -51,7 +54,13 @@ export interface ChatRequest {
   cache_control?: { type: "ephemeral" };
 }
 
-export function buildRequest(ctx: MarkingContext, images: LoadedImage[], model: string, effort: string): ChatRequest {
+export function buildRequest(
+  ctx: MarkingContext,
+  images: LoadedImage[],
+  pdfs: LoadedPdf[],
+  model: string,
+  effort: string,
+): ChatRequest {
   const text = [
     ctx.topic && `Topic: ${ctx.topic}`,
     `<question${ctx.max != null ? ` total_marks="${ctx.max}"` : ""}>\n${ctx.question}\n</question>`,
@@ -61,18 +70,24 @@ export function buildRequest(ctx: MarkingContext, images: LoadedImage[], model: 
       "The student typed their answer in a maths editor, so it is LaTeX, and words may be written in maths mode. Read it as the student intended, ignoring the formatting.",
     `<student_answer>\n${ctx.answer || "(blank)"}\n</student_answer>`,
     images.length > 0 && "The images referred to as [Image N] are attached below.",
+    pdfs.length > 0 && "The PDFs referred to as [PDF N] are attached below.",
   ]
     .filter(Boolean)
     .join("\n\n");
-  const content: string | Part[] = images.length
-    ? [
-        { type: "text", text },
-        ...images.flatMap((img): Part[] => [
-          { type: "text", text: `[Image ${img.n}]` },
-          { type: "image_url", image_url: { url: img.url } },
-        ]),
-      ]
-    : text;
+  const content: string | Part[] =
+    images.length || pdfs.length
+      ? [
+          { type: "text", text },
+          ...images.flatMap((img): Part[] => [
+            { type: "text", text: `[Image ${img.n}]` },
+            { type: "image_url", image_url: { url: img.url } },
+          ]),
+          ...pdfs.flatMap((pdf): Part[] => [
+            { type: "text", text: `[PDF ${pdf.n}]` },
+            { type: "file", file: { filename: pdf.filename, file_data: pdf.url } },
+          ]),
+        ]
+      : text;
   const request: ChatRequest = {
     model,
     messages: [

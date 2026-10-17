@@ -1,7 +1,17 @@
 import { GM_xmlhttpRequest } from "$";
 
 const MAX_IMAGES = 10;
+const MAX_PDFS = 2;
+const MAX_PDF_BYTES = 10_000_000;
 const MODEL_IMAGE = /^data:image\/(png|jpeg|webp|gif)[;,]/i;
+
+export interface LoadedPdf {
+  /** as in [PDF N] */
+  n: number;
+  filename: string;
+  /** data URL */
+  url: string;
+}
 
 export interface LoadedImage {
   /** as in [Image N] */
@@ -64,4 +74,23 @@ export async function loadImages(urls: string[]): Promise<LoadedImage[]> {
     }),
   );
   return loaded.filter((image) => image !== null);
+}
+
+export async function loadPdfs(urls: string[]): Promise<LoadedPdf[]> {
+  const loaded = await Promise.all(
+    urls.slice(0, MAX_PDFS).map(async (url, i) => {
+      try {
+        const blob = await fetchBlob(url);
+        if (blob.size > MAX_PDF_BYTES) throw new Error(`too large (${blob.size} bytes)`);
+        // The host may not say it's a PDF
+        const data = (await readAsDataUrl(blob)).replace(/^data:[^;,]*/, "data:application/pdf");
+        const filename = decodeURIComponent(new URL(url).pathname.split("/").pop() || `document-${i + 1}.pdf`);
+        return { n: i + 1, filename, url: data };
+      } catch (err) {
+        console.warn("[Atomi AI marking] Skipping PDF", url, err);
+        return null;
+      }
+    }),
+  );
+  return loaded.filter((pdf) => pdf !== null);
 }

@@ -2,7 +2,7 @@ import { signal } from "@preact/signals";
 import { parse } from "partial-json";
 import { ApiError, type ChatStream, chatUrl, streamChat, type Usage } from "./api";
 import { collectContext } from "./extract";
-import { loadImages } from "./images";
+import { loadImages, loadPdfs } from "./images";
 import { selectMark } from "./page";
 import { buildFollowUp, buildRequest, type ChatRequest } from "./prompt";
 import type { Settings } from "./settings";
@@ -136,9 +136,9 @@ export async function markAnswer(link: HTMLAnchorElement, settings: Settings) {
   try {
     const ctx = collectContext(link);
     update({ max: ctx.max });
-    const images = await loadImages(ctx.images);
+    const [images, pdfs] = await Promise.all([loadImages(ctx.images), loadPdfs(ctx.pdfs)]);
     if (run.aborted) throw stopped();
-    const body = buildRequest(ctx, images, settings.model, settings.effort);
+    let body = buildRequest(ctx, images, pdfs, settings.model, settings.effort);
     const url = chatUrl(settings.endpoint);
     const apiKey = settings.apiKey ?? "";
 
@@ -161,17 +161,20 @@ export async function markAnswer(link: HTMLAnchorElement, settings: Settings) {
         await run.request.done;
         break;
       } catch (err) {
-        // Some APIs reject structured outputs. The prompt describes the JSON too, so try again without it.
-        if (
-          !body.response_format ||
-          received ||
-          run.aborted ||
-          !(err instanceof ApiError) ||
-          ![400, 422].includes(err.status)
-        )
+        // Some APIs reject structured outputs or PDFs. The prompt describes the JSON too, so try again without
+        // structured outputs, then without the PDFs.
+        if (received || run.aborted || !(err instanceof ApiError) || ![400, 422].includes(err.status)) throw err;
+        if (body.response_format) {
+          console.warn("[Atomi AI marking] Retrying without response_format:", err.message);
+          delete body.response_format;
+        } else if (pdfs.length) {
+          console.warn("[Atomi AI marking] Retrying without PDFs:", err.message);
+          pdfs.length = 0;
+          body = buildRequest(ctx, images, pdfs, settings.model, settings.effort);
+          delete body.response_format;
+        } else {
           throw err;
-        console.warn("[Atomi AI marking] Retrying without response_format:", err.message);
-        delete body.response_format;
+        }
       }
     }
     if (run.aborted) throw stopped();
