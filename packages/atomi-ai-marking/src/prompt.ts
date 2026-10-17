@@ -35,7 +35,7 @@ const RESPONSE_FORMAT = {
 // Sent with the first follow-up rather than in the system prompt, so that the marking request is unchanged and stays
 // cached. Some providers move a system message to the top, so it goes in the user message.
 const FOLLOW_UP = `<instructions>
-The student is now asking follow-up questions about your marking. Reply conversationally in Markdown (with $...$ maths), not JSON. Be helpful, but guide them rather than spoon-feed. You can't change the recorded mark, but if you now think it was wrong, you can say so.
+The student is now asking you follow-up questions about your marking. Talk to them directly ("you", "your answer", "I marked…"). Get straight to answering the question they asked, briefly, in Markdown (with $...$ maths), not JSON. Explain concepts freely, but don't write a full-marks answer for them. Don't bring up their mark or repeat your feedback unless they ask about it. If they question the mark, or you realise you made a mistake, say honestly whether you'd change it (though the recorded mark can't be changed).
 </instructions>`;
 
 type Part =
