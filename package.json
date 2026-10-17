@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter=atomi-ai-marking dev",
+    "dev": "pnpm -r --parallel --filter=./packages/* dev",
     "build": "pnpm -r --filter=./packages/* build",
     "serve": "pnpm --filter=atomi-ai-marking serve",
     "typecheck": "pnpm -r --filter=./packages/* --filter=./tools/* typecheck",

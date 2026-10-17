@@ -21,6 +21,20 @@ It works with both the plain text answer box and the multi-format editor, includ
    By default the script uses [OpenRouter](https://openrouter.ai/keys) with `anthropic/claude-haiku-5.5`.
    You can choose any OpenAI-compatible endpoint and model.
 
+## atomi-keyboard
+
+A userscript that adds keyboard shortcuts for answering questions.
+
+### Install
+
+<https://raw.githubusercontent.com/wongcallum/atomi-userscripts/releases/atomi-keyboard.user.js>
+
+### Use
+
+Press <kbd>?</kbd> in Atomi to see the list of shortcuts.
+
+While you're typing an answer, only <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Enter</kbd> and <kbd>Esc</kbd> work.
+
 ## Development
 
 ```sh
@@ -29,4 +43,4 @@ pnpm dev
 pnpm mock-llm
 ```
 
-With the dev server running, install the dev loader from <http://localhost:4012/__vite-plugin-monkey.install.user.js>.
+With the dev servers running, open the `Local` URL each one prints to install its dev loader.
