@@ -6,6 +6,7 @@
 //   pnpm mock-llm:last [name]          # save the latest request to .mock-llm/<name>.txt, .json and images
 //
 // Append ":<mark>" to a scenario to set the mark it awards, e.g. "json:0". The default is 2.
+// Follow-up questions get a Markdown reply, streamed the same way (or the same error).
 
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createServer, request } from "node:http";
@@ -49,6 +50,13 @@ const markingMarkdown = (mark: number) =>
     "- Give units, e.g. $4\\,\\text{m s}^{-2}$\n- Say *velocity* rather than speed",
     `**Mark: ${mark}/4**`,
   ].join("\n\n");
+
+const FOLLOW_UP_REPLY = [
+  "Good question. Acceleration is the *rate of change* of velocity:",
+  "$$a = \\frac{v - u}{t}$$",
+  "So its units are velocity divided by time. What do you get if you divide $\\text{m s}^{-1}$ by $\\text{s}$?",
+  "- Your working was right\n- Only the units were missing",
+].join("\n\n");
 
 const STREAM = { chunkSize: 12, latency: 25, openRouterProcessing: true };
 
@@ -105,7 +113,21 @@ function fixtures(spec: string): FixtureFileEntry[] {
   const mark = Number(markArg);
   if (!Object.hasOwn(SCENARIOS, name)) throw new Error(`Unknown scenario "${name}"`);
   if (!Number.isInteger(mark)) throw new Error(`Invalid mark "${markArg}"`);
-  return SCENARIOS[name][1](mark);
+  const entries = SCENARIOS[name][1](mark);
+  // Requests with an assistant message, i.e. follow-ups, behave like the scenario's catch-all
+  const { response, ...rest } = entries[entries.length - 1];
+  const followUp: FixtureFileEntry = {
+    ...rest,
+    match: { turnIndex: 1 },
+    response:
+      "content" in response
+        ? {
+            content: FOLLOW_UP_REPLY,
+            usage: { prompt_tokens: 1840, completion_tokens: 96, prompt_tokens_details: { cached_tokens: 1536 } },
+          }
+        : response,
+  };
+  return [followUp, ...entries];
 }
 
 async function control(method: string, path: string, body?: unknown) {

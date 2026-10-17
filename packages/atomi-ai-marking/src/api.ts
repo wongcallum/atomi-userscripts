@@ -31,6 +31,12 @@ function errorMessage(raw: string, status: number): string {
   return body ? body.slice(0, 300) : "The model returned an empty response.";
 }
 
+export interface Usage {
+  prompt: number;
+  cached: number;
+  completion: number;
+}
+
 export interface ChatStream {
   /** the reply's text, once it has all arrived */
   done: Promise<string>;
@@ -43,11 +49,13 @@ export function streamChat({
   apiKey,
   body,
   onDelta,
+  onUsage,
 }: {
   url: string;
   apiKey: string;
   body: ChatRequest;
   onDelta: (delta: string) => void;
+  onUsage: (usage: Usage) => void;
 }): ChatStream {
   const { promise: done, resolve, reject } = Promise.withResolvers<string>();
   let raw = ""; // the body so far
@@ -63,7 +71,15 @@ export function streamChat({
       sse = true;
       if (data === "[DONE]") ended = true;
       if (ended) return;
-      let chunk: { error?: { message?: string }; choices?: { delta?: { content?: string } }[] };
+      let chunk: {
+        error?: { message?: string };
+        choices?: { delta?: { content?: string } }[];
+        usage?: {
+          prompt_tokens?: number;
+          completion_tokens?: number;
+          prompt_tokens_details?: { cached_tokens?: number };
+        };
+      };
       try {
         chunk = JSON.parse(data);
       } catch {
@@ -75,6 +91,14 @@ export function streamChat({
         text += delta;
         onDelta(delta);
       }
+      // In the last chunk
+      const { usage } = chunk;
+      if (usage)
+        onUsage({
+          prompt: usage.prompt_tokens ?? 0,
+          cached: usage.prompt_tokens_details?.cached_tokens ?? 0,
+          completion: usage.completion_tokens ?? 0,
+        });
     },
     onComment: () => (sse = true),
   });

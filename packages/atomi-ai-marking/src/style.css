@@ -17,7 +17,8 @@
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -45,6 +46,9 @@ button {
 
 /* Panel */
 .panel {
+  display: flex;
+  flex-direction: column;
+  max-height: 60vh;
   margin-bottom: 24px;
   overflow: hidden;
   overflow-wrap: anywhere;
@@ -77,6 +81,11 @@ button {
   background: white;
   border: 1px solid var(--line);
   border-radius: 999px;
+}
+.panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 .panel-body {
   padding: 16px;
@@ -175,6 +184,69 @@ button {
   border-radius: 50%;
   background: conic-gradient(var(--tone) calc(var(--p) * 1%), var(--line) 0);
   mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
+}
+
+/* Follow-up questions */
+.chat {
+  padding: 16px;
+  border-top: 1px solid var(--line);
+}
+.turn + .turn {
+  margin-top: 16px;
+}
+.question {
+  white-space: pre-wrap;
+}
+.answer {
+  margin: 10px 0 0;
+}
+.question {
+  width: fit-content;
+  max-width: 85%;
+  margin-left: auto;
+  padding: 6px 12px;
+  background: rgba(0, 87, 255, 0.08);
+  border-radius: 12px 12px 4px;
+}
+
+.ask {
+  display: flex;
+  flex: none;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+}
+.ask textarea {
+  flex: 1;
+  min-height: 2.25em;
+  max-height: 9em;
+  padding: 0.375em 10px;
+  resize: none;
+  field-sizing: content;
+  line-height: 1.5;
+  background: white;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 8px;
+}
+.ask textarea:focus-visible {
+  outline-offset: -1px;
+}
+.ask button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25em;
+  height: 2.25em;
+  padding: 0;
+  color: white;
+  background: var(--accent);
+  border: 0;
+  border-radius: 50%;
+}
+.ask button:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 .shimmer {
