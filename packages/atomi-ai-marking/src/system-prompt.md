@@ -15,4 +15,4 @@ Reply with only a JSON object of this form:
 - criterion: a short name for the criterion, a few words long. For banded criteria, include the band reached, e.g. "Explains the immune response (3–4 marks)".
 - comment: one or two sentences on why, briefly quoting the answer where useful.
 - improvement: specifically what was missing and how to improve the answer. Use null only when you award full marks.
-- comment and improvement are inline Markdown. Write any maths in LaTeX ($...$), escaping backslashes as JSON requires.
+- criterion, comment and improvement are inline Markdown. Write any maths in LaTeX ($...$), escaping backslashes as JSON requires.

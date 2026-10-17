@@ -44,7 +44,9 @@ function CriterionRow({ criterion: c, done }: { criterion: Criterion; done: bool
         <Icon d={known?.icon} />
       </span>
       <div>
-        {c.criterion && <b>{String(c.criterion)}: </b>}
+        {c.criterion && (
+          <b class="html" dangerouslySetInnerHTML={{ __html: `${renderInline(String(c.criterion))}: ` }} />
+        )}
         {typeof c.comment === "string" && (
           <span class="html" dangerouslySetInnerHTML={{ __html: renderInline(c.comment) }} />
         )}
