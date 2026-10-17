@@ -25,7 +25,14 @@ export function storedSettings(): Settings {
 
 export function loadSettings(): Settings {
   const stored = storedSettings();
-  return { ...stored, endpoint: stored.endpoint || DEFAULT_ENDPOINT, model: stored.model || DEFAULT_MODEL };
+  const endpoint = stored.endpoint.trim();
+  const model = stored.model.trim();
+  return {
+    apiKey: stored.apiKey?.trim(),
+    endpoint: endpoint || DEFAULT_ENDPOINT,
+    model: model || DEFAULT_MODEL,
+    effort: stored.effort.trim(),
+  };
 }
 
 export function saveSettings(settings: Settings) {
