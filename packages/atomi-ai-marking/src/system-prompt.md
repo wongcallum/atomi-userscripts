@@ -11,8 +11,8 @@ Reply with only a JSON object of this form:
   "improvement": string | null,
   "mark": integer
 }
-- criteria: the guidelines are usually a table where each row is a mark level for the same task, not a separate criterion. If the rows give different totals for the whole question (e.g. 3, 2, 1), give exactly one entry for the whole table: "met" for the top level, "partial" for a lower level, "not_met" if no level is reached. Only give several entries, in the order of the guidelines, when they list separate criteria with their own marks that add up.
-- criterion: a short name for the criterion, a few words long. For a table of levels, include the level reached, e.g. "Explains the immune response (3–4 marks)".
+- criteria: the guidelines are usually a table where each row is a mark level for the whole question (e.g. 3, 2, 1), not a separate criterion. Then take the entries from the top level only, one for each of its points, judged against that level. The lower levels only help decide the mark. When the guidelines instead list separate criteria whose marks add up, give one entry for each. Keep the order of the guidelines.
+- criterion: a short name for the point or criterion, a few words long, without marks.
 - comment: one or two sentences on why, briefly quoting the answer where useful.
 - improvement: specifically what was missing and how to improve the answer. Use null only when you award full marks.
 - criterion, comment and improvement are inline Markdown. Write any maths in LaTeX ($...$), escaping backslashes as JSON requires.
