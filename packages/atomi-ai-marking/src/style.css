@@ -8,6 +8,11 @@
   --bad: #c62828;
   --line: rgba(128, 128, 128, 0.3);
   --tint: rgba(128, 128, 128, 0.06);
+  /* Text and surfaces follow atomi-dark's palette, through the page's color-scheme */
+  --accent-text: light-dark(#0057ff, #5c9bff);
+  --bad-text: light-dark(#c62828, #ff6a5e);
+  --ink: light-dark(#1a1a1a, #e1e3e7);
+  --surface: light-dark(white, #1c1e22);
 }
 
 *,
@@ -78,7 +83,7 @@ button {
   flex: none;
   padding: 2px 10px;
   font-size: 13px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 999px;
 }
@@ -100,7 +105,7 @@ button {
   margin: 8px 0 0;
 }
 .error {
-  color: var(--bad);
+  color: var(--bad-text);
 }
 .muted {
   opacity: 0.6;
@@ -148,7 +153,7 @@ button {
   border-radius: 8px;
 }
 .improvement b {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .score {
@@ -225,7 +230,7 @@ button {
   resize: none;
   field-sizing: content;
   line-height: 1.5;
-  background: white;
+  background: var(--surface);
   border: 1px solid rgba(128, 128, 128, 0.5);
   border-radius: 8px;
 }
@@ -273,8 +278,8 @@ dialog {
   width: min(440px, calc(100vw - 32px));
   padding: 20px 24px;
   font-size: 15px;
-  color: #1a1a1a;
-  background: white;
+  color: var(--ink);
+  background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -287,7 +292,7 @@ dialog h2 {
 }
 dialog .message {
   margin: 0 0 12px;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 dialog label {
   display: block;
@@ -300,7 +305,7 @@ dialog input {
   margin: 4px 0 2px;
   padding: 4px 8px;
   font-weight: normal;
-  background: white;
+  background: var(--surface);
   border: 1px solid rgba(128, 128, 128, 0.5);
   border-radius: 4px;
 }
@@ -331,7 +336,7 @@ dialog small {
 
 /* HTML rendered from the model's Markdown */
 .html a {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .html code {
   padding: 0.1em 0.3em;
