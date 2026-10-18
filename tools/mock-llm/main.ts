@@ -18,18 +18,21 @@ const BASE = `http://127.0.0.1:${PORT}`;
 const OUT_DIR = join(import.meta.dirname, "../../.mock-llm");
 const REQUESTS_DIR = join(OUT_DIR, "requests");
 
-function markingJson(mark: number): string {
+// Some models write \(...\) and \[...\] instead of $...$ and $$...$$
+const brackets = (text: string) => text.replace(/\$\$(.+?)\$\$/gs, "\\[$1\\]").replace(/\$(.+?)\$/g, "\\($1\\)");
+
+function markingJson(mark: number, delimit = (text: string) => text): string {
   const data = {
     criteria: [
       {
         criterion: "States the relationship",
         status: "met",
-        comment: "Correctly gives $v = u + at$ and identifies **each variable**.",
+        comment: delimit("Correctly gives $v = u + at$ and identifies **each variable**."),
       },
       {
         criterion: "Applies it to the data (2–3 marks)",
         status: "partial",
-        comment: 'Substitutes into $a = \\frac{\\Delta v}{\\Delta t}$ but drops the units: "a = 4".',
+        comment: delimit('Substitutes into $a = \\frac{\\Delta v}{\\Delta t}$ but drops the units: "a = 4".'),
       },
       {
         criterion: "Uses correct terminology",
@@ -37,7 +40,9 @@ function markingJson(mark: number): string {
         comment: 'Says "speed" where *velocity* is needed.',
       },
     ],
-    improvement: "Give units with the final answer, e.g. $4\\,\\text{m s}^{-2}$, and say *velocity* rather than speed.",
+    improvement: delimit(
+      "Give units with the final answer, e.g. $4\\,\\text{m s}^{-2}$, and say *velocity* rather than speed.",
+    ),
     mark,
   };
   return JSON.stringify(data, null, 2);
@@ -60,7 +65,10 @@ const FOLLOW_UP_REPLY = [
 
 const STREAM = { chunkSize: 12, latency: 25, openRouterProcessing: true };
 
-const SCENARIOS: Record<string, [description: string, fixtures: (mark: number) => FixtureFileEntry[]]> = {
+const SCENARIOS: Record<
+  string,
+  [description: string, fixtures: (mark: number) => FixtureFileEntry[], followUp?: string]
+> = {
   json: [
     "Marking JSON, streamed in chunks (default)",
     (mark) => [{ match: {}, response: { content: markingJson(mark) }, ...STREAM }],
@@ -78,6 +86,11 @@ const SCENARIOS: Record<string, [description: string, fixtures: (mark: number) =
   markdown: [
     'Markdown instead of JSON, ending "Mark: n/4"',
     (mark) => [{ match: {}, response: { content: markingMarkdown(mark) }, ...STREAM }],
+  ],
+  brackets: [
+    "Marking JSON and follow-ups with \\(...\\) and \\[...\\] maths",
+    (mark) => [{ match: {}, response: { content: markingJson(mark, brackets) }, ...STREAM }],
+    brackets(FOLLOW_UP_REPLY),
   ],
   "reject-format": [
     "HTTP 400 if response_format is sent, otherwise like json",
@@ -122,7 +135,8 @@ function fixtures(spec: string): FixtureFileEntry[] {
   const mark = Number(markArg);
   if (!Object.hasOwn(SCENARIOS, name)) throw new Error(`Unknown scenario "${name}"`);
   if (!Number.isInteger(mark)) throw new Error(`Invalid mark "${markArg}"`);
-  const entries = SCENARIOS[name][1](mark);
+  const [, scenarioFixtures, followUpReply = FOLLOW_UP_REPLY] = SCENARIOS[name];
+  const entries = scenarioFixtures(mark);
   // Requests with an assistant message, i.e. follow-ups, behave like the scenario's catch-all
   const { response, ...rest } = entries[entries.length - 1];
   const followUp: FixtureFileEntry = {
@@ -131,7 +145,7 @@ function fixtures(spec: string): FixtureFileEntry[] {
     response:
       "content" in response
         ? {
-            content: FOLLOW_UP_REPLY,
+            content: followUpReply,
             usage: { prompt_tokens: 1840, completion_tokens: 96, prompt_tokens_details: { cached_tokens: 1536 } },
           }
         : response,

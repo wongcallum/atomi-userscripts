@@ -7,6 +7,23 @@ const md = new Marked({ gfm: true });
 // Rendered by Temml (aliased to katex in vite.config.ts) as MathML, which the browser draws itself, so no CSS or
 // fonts are needed
 md.use(markedKatex({ throwOnError: false, strict: false, nonStandard: true }));
+// Some models write \(...\) and \[...\] despite being asked for $...$.
+const BRACKETED = /^\\\((.+?)\\\)|^\\\[(.+?)\\\]/s;
+md.use({
+  extensions: [
+    {
+      name: "bracketedKatex",
+      level: "inline",
+      start: (src) => src.search(/\\[([]/),
+      tokenizer(src) {
+        const match = BRACKETED.exec(src);
+        if (!match) return;
+        const [raw, inline, display] = match;
+        return { type: "inlineKatex", raw, text: (inline ?? display).trim(), displayMode: display !== undefined };
+      },
+    },
+  ],
+});
 md.use({
   renderer: {
     // Show HTML from the model as text rather than adding it to the page
