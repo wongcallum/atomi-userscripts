@@ -2,8 +2,8 @@
   padding: 20px 24px;
   font-size: 15px;
   line-height: 1.5;
-  color: #1a1a1a;
-  background: white;
+  color: light-dark(#1a1a1a, #e1e3e7);
+  background: light-dark(white, #1c1e22);
   border: 1px solid rgba(128, 128, 128, 0.3);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
