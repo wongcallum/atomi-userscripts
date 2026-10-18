@@ -249,6 +249,18 @@ importers:
         specifier: 'catalog:'
         version: 8.1.1(postcss@8.5.30)(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0))
 
+  packages/atomi-dark:
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vite:
+        specifier: 'catalog:'
+        version: 8.3.4(@types/node@24.19.2)(jiti@2.7.0)
+      vite-plugin-monkey:
+        specifier: 'catalog:'
+        version: 8.1.1(postcss@8.5.30)(vite@8.3.4(@types/node@24.19.2)(jiti@2.7.0))
+
   packages/atomi-keyboard:
     dependencies:
       tinykeys:

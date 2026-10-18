@@ -21,6 +21,19 @@ It works with both the plain text answer box and the multi-format editor, includ
    By default the script uses [OpenRouter](https://openrouter.ai/keys) with `google/gemini-3.8-flash`.
    You can choose any OpenAI-compatible endpoint and model.
 
+## atomi-dark
+
+Adds dark mode to Atomi.
+
+### Install
+
+<https://raw.githubusercontent.com/wongcallum/atomi-userscripts/releases/atomi-dark.user.js>
+
+### Use
+
+By default it follows your system's light or dark setting.
+To always use dark or light, click **Theme** in your userscript manager's menu.
+
 ## atomi-keyboard
 
 A userscript that adds keyboard shortcuts for answering questions.
